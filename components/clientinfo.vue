@@ -1,5 +1,5 @@
 <template>
-  <div class="block h-auto bg-gray-900 mt-10 w-3/5 rounded-2xl m-auto p-6">
+  <div class="block h-auto bg-gray-900 mt-10 w-full md:w-3/5 rounded-2xl m-auto p-6">
       <h2 class="text-white text-center text-2xl font-bold mb-4">Обмен Tether (TRC-20) USDT на Тинькофф RUB</h2>
 
       <div class="bg-slate-800 text-white p-4 rounded-lg mb-6">
@@ -50,7 +50,6 @@
           <span class="absolute left-4 top-3 text-gray-400">*</span>
       </div>
 
-      <!-- Соглашение -->
       <div class="flex flex-col text-white mb-4">
           <label class="inline-flex items-center">
             <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600" />
@@ -60,6 +59,9 @@
             <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600" />
             <span class="ml-2">Я согласен с <a href="#" class="text-blue-400 underline">условиями AML / CTF & KYC</a></span>
           </label>
+          <button class="mt-6 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-200 ease-in-out">
+            Создать заявку
+          </button>
       </div>
   </div>
 </template>

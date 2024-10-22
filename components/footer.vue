@@ -2,7 +2,7 @@
     <div class="bg-slate-900 text-gray-400 py-8 mt-10">
       <div class="container mx-auto w-4/5 flex justify-between items-start">
   
-        <!-- Логотип и описание -->
+
         <div class="w-1/3 hidden sm:block">
           <h3 class="text-white text-xl font-bold mb-4">GAVRILOVEXCHANGE</h3>
           <p class="text-sm mr-10">
@@ -10,7 +10,7 @@
           </p>
         </div>
   
-        <!-- Полезные ссылки -->
+
         <div class="w-1/4">
           <h3 class="text-white text-lg font-semibold mb-4">Полезные ссылки</h3>
           <ul>
@@ -21,8 +21,8 @@
           </ul>
         </div>
   
-        <!-- Социальные сети -->
-        <div class="w-1/4">
+
+        <div class="w-1/4 hidden sm:block">
           <h3 class="text-white text-lg font-semibold mb-4">Следите за нами</h3>
           <div class="flex space-x-4">
             <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" class="w-6 h-6"/></a>
@@ -31,14 +31,13 @@
           </div>
         </div>
   
-        <!-- Контактная информация -->
-        <div class="w-1/4">
+        <div class="sm:w-1/4 mx-20">
           <h3 class="text-white text-lg font-semibold mb-4">Контактная информация</h3>
           <p class="text-sm">
-            Телефон: <a href="tel:+71234567890" class="text-blue-400 hover:text-white">+7 (777) 777-77-77</a>
+            Телефон: <a href="" class="text-blue-400 hover:text-white">+7 (777) 777-77-77</a>
           </p>
           <p class="text-sm" >
-            Email: <a href="mailto:info@example.com" class="text-blue-400 hover:text-white">gavrilov exchange @google.com</a>
+            Email: <a href="" class="text-blue-400 hover:text-white">gavrilov exchange @google.com</a>
           </p>
           <p class="text-sm">г. Брянск</p>
         </div>

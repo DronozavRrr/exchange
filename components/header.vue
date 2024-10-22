@@ -8,17 +8,17 @@
           </div>
         </div>
         <ul class="sm:flex block items-center sm:gap-10">
-          <li class="flex items-center gap-3 cursor-pointer hover:text-gray-400">
+          <li class="flex items-center gap-3 cursor-pointer ">
             <img src="/rules.png" alt="">
-            <b class="text-gray-300">Правила обмена</b>
+            <b class="text-gray-300 hover:text-gray-400">Правила обмена</b>
           </li>
-          <li class="flex items-center gap-3 cursor-pointer hover:text-gray-400">
+          <li class="flex items-center gap-3 cursor-pointer ">
             <img src="/contact.png" alt="">
-            <b class="text-gray-300">Контакты</b>
+            <b class="text-gray-300 hover:text-gray-400">Контакты</b>
           </li>
-          <li class="flex items-center gap-3 cursor-pointer hover:text-gray-400">
+          <li class="flex items-center gap-3 cursor-pointer ">
             <img src="/profile.png" alt="">
-            <b class="text-gray-300">Профиль</b>
+            <b class="text-gray-300 hover:text-gray-400">Профиль</b>
           </li>
           <li class="flex items-center gap-3 cursor-pointer hover:text-gray-400 hidden" >
             <img src="" alt="">
