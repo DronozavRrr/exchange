@@ -20,9 +20,9 @@
             <img src="/profile.png" alt="">
             <b class="text-gray-300 hover:text-gray-400">Профиль</b>
           </li>
-          <li class="flex items-center gap-3 cursor-pointer hover:text-gray-400 hidden" >
+          <li class="flex items-center gap-3 cursor-pointer hover:text-gray-400" >
             <img src="" alt="">
-            <b class="text-gray-300">Логин</b>
+            <b class="text-gray-300"> <a href="/login">Логин</a></b>
           </li>
           <li class="flex items-center gap-3 cursor-pointer hover:text-gray-400 hidden">
             <img src="" alt="">
