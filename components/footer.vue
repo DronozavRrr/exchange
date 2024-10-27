@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-slate-900 text-gray-400 py-8 mt-10">
+    <div class="bg-slate-900 text-gray-400 py-8 mt-10 rounded-xl">
       <div class="container mx-auto w-4/5 flex justify-between items-start">
   
 

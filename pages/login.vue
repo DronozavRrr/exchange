@@ -1,12 +1,14 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUsersStore } from '~/stores/index.js';
 
 const router = useRouter();
 const isLogin = ref(true); 
 const toggleAuthMode = () => {
   isLogin.value = !isLogin.value;
 };
+const usersStore = useUsersStore();
 
 const loginData = ref({ email: '', password: '' });
 const registerData = ref({ email: '', password: '', confirmPassword: '', role: 'user' });
@@ -31,7 +33,7 @@ const submitForm = async () => {
       body: JSON.stringify(data),
     });
     const responseData = await response.json(); 
-    console.log(responseData); 
+    usersStore.auth(responseData);
     if (response.ok) {
       router.push('/');
     } else {
