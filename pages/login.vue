@@ -33,13 +33,22 @@ const submitForm = async () => {
       body: JSON.stringify(data),
     });
     const responseData = await response.json(); 
-    usersStore.auth(responseData);
-    if (response.ok) {
-      router.push('/');
-    } else {
-      const errorResponse = await response.json();
-      alert(errorResponse.message || 'Ошибка при обработке запроса');
+    console.log(responseData)
+    if(isLogin.value)
+    {
+        usersStore.auth(responseData.token);
+      if (response.ok) {
+        router.push('/');
+      } else {
+        const errorResponse = await response.json();
+        alert(errorResponse.message || 'Ошибка при обработке запроса');
+      }
     }
+    else{
+      isLogin.value = true;
+
+    }
+    
   } catch (error) {
     console.error('Ошибка:', error);
   }

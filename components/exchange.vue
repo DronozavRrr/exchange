@@ -13,11 +13,12 @@ const pairsState = usePairsStore();
 const amountToSend = ref(0); 
 const convertedAmount = ref(0); 
 
+
 const fetchPairs = async () => {
   try {
     const response = await fetch(`${BACKEND_URL}pairs`, {
       method: 'GET',
-      headers: { Authorization: `Bearer ${usersState.token.token}` }
+      headers: { Authorization: `Bearer ${usersState.token}` }
     });
     if (response.ok) {
       all_pairs.value = await response.json();
@@ -33,7 +34,7 @@ const getTradeTokens = async (first_crypto) => {
   try {
     const response = await fetch(`${BACKEND_URL}pair/name/${first_crypto}`, {
       method: 'GET',
-      headers: { Authorization: `Bearer ${usersState.token.token}` }
+      headers: { Authorization: `Bearer ${usersState.token}` }
     });
     if (response.ok) {
       trade_tokens.value = await response.json();

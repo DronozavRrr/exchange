@@ -12,6 +12,11 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-
+  runtimeConfig: {
+    public: {
+        JWT_TOKEN_COOKIE_NAME: process.env.JWT_TOKEN_COOKIE_NAME,
+        JWT_REFRESH_TOKEN_NAME: process.env.JWT_REFRESH_TOKEN_NAME,
+    }
+  },
   modules: ['@pinia/nuxt'],
 });
