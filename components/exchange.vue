@@ -16,12 +16,25 @@ const convertedAmount = ref(0);
 
 const fetchPairs = async () => {
   try {
-    const response = await fetch(`${BACKEND_URL}pairs`, {
+    let response = await fetch(`${BACKEND_URL}pairs`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${usersState.token}` }
     });
+
     if (response.ok) {
-      all_pairs.value = await response.json();
+      const pairs = await response.json();
+
+      const uniquePairs = [];
+      const seenFirstCrypto = new Set();
+
+      pairs.forEach(pair => {
+        if (!seenFirstCrypto.has(pair.first_crypto)) {
+          uniquePairs.push(pair);
+          seenFirstCrypto.add(pair.first_crypto);
+        }
+      });
+
+      all_pairs.value = uniquePairs;
     } else {
       console.error("Ошибка при получении данных пар");
     }
@@ -38,6 +51,18 @@ const getTradeTokens = async (first_crypto) => {
     });
     if (response.ok) {
       trade_tokens.value = await response.json();
+
+      if (trade_tokens.value.length > 0) {
+        pairsState.second_crypto = trade_tokens.value[0].second_crypto;
+        selectedSecondCrypto.value = trade_tokens.value[0].second_crypto;
+        pairsState.course = trade_tokens.value[0].course; // Установка course
+        console.log(`Initial course: ${pairsState.course}`);
+      } else {
+        pairsState.second_crypto = null;
+        selectedSecondCrypto.value = null;
+        pairsState.course = null;
+      }
+      
     } else {
       console.error("Ошибка при получении данных токенов");
     }
@@ -50,12 +75,25 @@ const getTradeTokens = async (first_crypto) => {
 const handleFirstCryptoChange = (event) => {
   
   const selectedId = event.target.value;
-  console.log(`tetrsdfsd - ${selectedPairId.value}`);
   selectedPairId.value = selectedId; 
+  
 
   pairsState.first_crypto = selectedId;
-  console.log(` test - ${pairsState.first_crypto}`)
   getTradeTokens(selectedId);
+};
+const handleSecondCryptoChange = (event) => {
+  pairsState.second_crypto = selectedSecondCrypto.value;
+  console.log(`Selected second crypto: ${pairsState.second_crypto}`);
+
+
+  const selectedToken = trade_tokens.value.find(token => token.second_crypto === selectedSecondCrypto.value);
+  console.log("tutau - ")
+  console.log(selectedToken.course)
+  if (selectedToken) {
+    pairsState.course = selectedToken.course;
+    pairsState.type_second_crypto= selectedToken.type_second_crypto;
+    console.log(`Selected course: ${pairsState.course}`);
+  }
 };
 watch(amountToSend, (newAmount) => 
 {
@@ -72,8 +110,16 @@ watch(amountToSend, (newAmount) =>
   }
 });
 
-onMounted(() => {
-  fetchPairs();
+onMounted(async () => {
+  await fetchPairs();
+
+  if (all_pairs.value.length > 0) {
+    const defaultFirstCrypto = all_pairs.value[0].first_crypto;
+    selectedPairId.value = defaultFirstCrypto;
+    pairsState.first_crypto = defaultFirstCrypto;
+    
+    await getTradeTokens(defaultFirstCrypto);
+  }
 });
 </script>
 
@@ -99,9 +145,15 @@ onMounted(() => {
 
     <div class="bg-gray-900 h-1/5 w-full md:w-2/5 rounded-xl mt-10 m-auto">
       <b class="text-white">Получаете</b>
-      <select class="bg-slate-800 text-white w-full h-12 rounded-xl p-2">
-        <option v-for="token in trade_tokens" :key="token.id" :value="token.id ">{{ token.second_crypto }}</option>
-      </select>
+      <select 
+  class="bg-slate-800 text-white w-full h-12 rounded-xl p-2" 
+  v-model="selectedSecondCrypto" 
+  @change="handleSecondCryptoChange"
+>
+  <option v-for="token in trade_tokens" :key="token.id" :value="token.second_crypto">
+    {{ token.second_crypto }}
+  </option>
+</select>
       <input 
         type="number" 
         placeholder="Сумма для получения" 
