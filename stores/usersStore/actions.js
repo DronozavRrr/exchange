@@ -1,20 +1,42 @@
-export default
-{
-    auth(user_token)
-    {
-        console.log()
-        this.token =user_token;
-        this.isLogin = true;
-        const runtimeConfig = useRuntimeConfig();
-        const token = useCookie(runtimeConfig.public.JWT_TOKEN_COOKIE_NAME);
-        token.value = user_token;
+export default {
+    auth(user_token) {
+      this.token = user_token;
+      this.isLogin = true;
+  
+      const runtimeConfig = useRuntimeConfig();
+      const token = useCookie(runtimeConfig.public.JWT_TOKEN_COOKIE_NAME);
+      token.value = user_token;
+  
+
+      this.fetchCurrentUser();
     },
-    logout()
-    {
-        this.token ="";
-        this.isLogin = false;
-        const runtimeConfig = useRuntimeConfig();
-        const token = useCookie(runtimeConfig.public.JWT_TOKEN_COOKIE_NAME);
-        token.value = "";
-    }
-}
+    logout() {
+      this.token = "";
+      this.isLogin = false;
+      this.user = null; 
+  
+      const runtimeConfig = useRuntimeConfig();
+      const token = useCookie(runtimeConfig.public.JWT_TOKEN_COOKIE_NAME);
+      token.value = "";
+    },
+    async fetchCurrentUser() {
+      try {
+        const response = await fetch('http://localhost:8080/api/user/profile', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+        console.log(response)
+        if (response.ok) {
+          const userData = await response.json();
+          this.user = userData;
+        } else {
+          console.error('Не удалось загрузить данные пользователя');
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке данных пользователя:', error);
+      }
+    },
+  };
+  
