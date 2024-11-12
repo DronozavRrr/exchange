@@ -8,10 +8,21 @@
         <li class="mb-3">В случае ошибки обратитесь в службу поддержки.</li>
         <li class="mb-3">Платформа оставляет за собой право изменить правила обмена.</li>
       </ol>
+      <button
+      @click="logout_click"
+      class="w-full h-12 bg-red-600 text-white rounded-xl mt-5 hover:bg-red-500 transition duration-200 ease-in-out"
+    >
+    Назад
+    </button>
     </div>
   </template>
   
   <script setup>
-  // Скрипт не обязателен для этой страницы, если данные статичны
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const logout_click = () => {
+  router.push('/');
+};
+
   </script>
   

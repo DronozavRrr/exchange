@@ -4,10 +4,22 @@
       <p class="text-gray-300 mb-2"><strong>Телефон:</strong> +7 (123) 456-7890</p>
       <p class="text-gray-300 mb-2"><strong>Email:</strong> support@gavrilovexchange.com</p>
       <p class="text-gray-300"><strong>Адрес:</strong> Москва, ул. Примерная, 10</p>
+      <button
+      @click="logout_click"
+      class="w-full h-12 bg-red-600 text-white rounded-xl mt-5 hover:bg-red-500 transition duration-200 ease-in-out"
+    >
+    Назад
+    </button>
     </div>
+    
   </template>
   
   <script setup>
-  // Скрипт не обязателен для этой страницы, если данные статичны
+import { useRouter } from 'vue-router';
+const router = useRouter();
+const logout_click = () => {
+  router.push('/');
+};
+
   </script>
   

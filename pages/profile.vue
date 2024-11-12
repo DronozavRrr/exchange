@@ -24,7 +24,7 @@ if (!usersStore.user) {
       @click="logout_click"
       class="w-full h-12 bg-red-600 text-white rounded-xl mt-5 hover:bg-red-500 transition duration-200 ease-in-out"
     >
-      Выйти
+    Назад
     </button>
   </div>
 </template>
