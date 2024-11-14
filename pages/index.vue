@@ -9,3 +9,14 @@
     </div>
   </template>
   
+  
+  <script setup>
+  const usersStore = useUsersStore();
+  import { onMounted } from 'vue';
+  onMounted(()=>
+{
+  usersStore.fetchCurrentUser();
+
+})
+
+</script>

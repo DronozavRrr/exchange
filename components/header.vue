@@ -24,7 +24,6 @@
               <img src="/login.png" alt="login">
               <b class="text-gray-300"><a href="/login">Логин</a></b>
           </li>
-          <!-- Показ ссылки на CMS только для администраторов -->
           <li v-if="usersStore.isLogin && usersStore.user?.role === 'admin'" class="flex items-center gap-3 cursor-pointer hover:text-gray-400">
               <img src="/cms.png" alt="cms">
               <b class="text-gray-300"><a href="/cms">CMS</a></b>
@@ -37,9 +36,11 @@
   </header>
 </template>
 
+
 <script setup>
 import { useUsersStore } from '~/stores';
 import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 
 const usersStore = useUsersStore();
 const router = useRouter();
@@ -48,4 +49,8 @@ const logout_click = async () => {
   usersStore.logout();
   await router.push('/login');
 };
+onMounted(() => 
+{
+    console.log('User role:', usersStore.user?.role);
+})
 </script>
