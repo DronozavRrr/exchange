@@ -73,28 +73,27 @@ onMounted(()=>
 
 
 <template>
-    <div>
-      <h2 class="mt-5 text-white text-center text-3xl font-bold mb-6">Последние обмены</h2>
+  <div>
+    <h2 class="mt-5 text-white text-center text-3xl font-bold mb-6">Последние обмены</h2>
 
-      <div class="sm:flex block w-10/12 h-auto bg-slate-800 m-auto mt-5 p-6 rounded-2xl shadow-lg justify-between">
+    <div class="sm:flex block w-10/12 h-auto bg-slate-800 m-auto mt-5 p-6 rounded-2xl shadow-lg justify-between">
   
-        <div v-for="exchange in history.value" :key="exchange._id" >
-    <div class="flex justify-between mb-3">
-        <img src="/ready_swap.png" alt="transaction" class="w-1/6 h-1/6 filter-white" />
-        <span class="text-sm text-gray-400">{{ new Date(exchange.createdAt).toLocaleTimeString() }}</span>
-    </div>
-    <p>Обмен</p>
-    <h4 style="color: red; font-size: 24px;">test</h4>
-    <h4  class="text-lg font-bold">
-        {{ exchange.amount }} {{ exchange.first_crypto }}
-    </h4>
-    <p  class="text-gray-400">на</p>
-    <h4  class="text-lg font-bold">
-        {{ exchange.amount * exchange.course }} {{ exchange.second_crypto }}
-    </h4>
+      <div v-for="exchange in history" :key="exchange._id" class="w-3/5 sm:w-1/5 h-auto bg-gray-900 text-white p-4 rounded-2xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl m-auto">
+  <div class="flex justify-between mb-3">
+      <img src="/public/ready_swap.png" alt="transaction" class="w-1/6 h-1/6 filter-white" />
+      <span class="text-sm text-gray-400">{{ new Date(exchange.createdAt).toLocaleTimeString() }}</span>
+  </div>
+  <p>Обмен</p>
+  <h4  class="text-lg font-bold">
+      {{ exchange.amount }} {{ exchange.first_crypto }}
+  </h4>
+  <p  class="text-gray-400">на</p>
+  <h4  class="text-lg font-bold">
+      {{ exchange.amount * exchange.course }} {{ exchange.second_crypto }}
+  </h4>
 </div>
-    </div>
-    </div>
+  </div>
+  </div>
 </template>
 
 <style>
