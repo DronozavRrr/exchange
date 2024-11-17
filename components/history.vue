@@ -45,7 +45,7 @@ async function getHistory() {
         }
     }
 
-    history.value = [...data];
+    history.value = [...data].slice(0,4);
     console.log("Updated history:", history.value);
 }
 
@@ -78,7 +78,7 @@ onMounted(()=>
 
     <div class="sm:flex block w-10/12 h-auto bg-slate-800 m-auto mt-5 p-6 rounded-2xl shadow-lg justify-between">
   
-      <div v-for="exchange in history" :key="exchange._id" class="w-3/5 sm:w-1/5 h-auto bg-gray-900 text-white p-4 rounded-2xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl m-auto">
+      <div v-for="exchange in history" :key="exchange._id" class="block w-3/5 sm:w-1/5 h-auto bg-gray-900 text-white p-4 rounded-2xl shadow-md transform transition duration-300 hover:scale-105 hover:shadow-xl m-auto">
   <div class="flex justify-between mb-3">
       <img src="/public/ready_swap.png" alt="transaction" class="w-1/6 h-1/6 filter-white" />
       <span class="text-sm text-gray-400">{{ new Date(exchange.createdAt).toLocaleTimeString() }}</span>
