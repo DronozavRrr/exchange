@@ -5,7 +5,7 @@ const router = useRouter();
 const all_users = ref([])
 const all_pairs = ref([]);
 const all_bids = ref([])
-const all_exchange = ref([])
+const all_exchanges = ref([])
 const usersState = useUsersStore(); 
 const pairsState = usePairsStore();
 const BACKEND_URL = "http://localhost:8080/api/";
@@ -114,7 +114,7 @@ onMounted(()=>
   
       <main class="flex-grow p-6">
         <div class="bg-gray-800 p-4 rounded-md mb-6">
-          <h2 class="text-lg font-semibold mb-4">Фильтры</h2>
+          <h2 class="text-lg font-semibold mb-4">Фильтры для пользователей</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label for="email" class="block text-sm font-medium mb-1">Email</label>
@@ -142,10 +142,21 @@ onMounted(()=>
           >
             Применить фильтры
           </button>
+
+          <button
+            class="mt-4 bg-green-600 px-4 py-2 rounded-md ml-2 hover:bg-blue-500 transition duration-200"
+          >
+            Создать пользователя
+          </button>
         </div>
+
+
+
+
+        
   
-        <div class="bg-gray-800 p-4 rounded-md">
-          <h2 class="text-lg font-semibold mb-4">Данные</h2>
+        <div class="bg-gray-800 p-6 rounded-md ">
+          <h2 class="text-lg font-semibold mb-4">Пользователи</h2>
           <div class="overflow-x-auto">
             <table class="min-w-full text-left text-sm">
               <thead class="bg-gray-700">
@@ -156,9 +167,9 @@ onMounted(()=>
                 </tr>
               </thead>
               <tbody>
-                <tr class="border-b border-gray-600">
-                  <td class="px-4 py-2">test@mail.ru</td>
-                  <td class="px-4 py-2">Администратор</td>
+                <tr v-for="user in all_users" :key="user._id" class="border-b border-gray-600">
+                  <td class="px-4 py-2">{{ user.email }}</td>
+                  <td class="px-4 py-2">{{ user.role }}</td>
                   <td class="px-4 py-2">
                     <button class="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-400 transition">
                       Редактировать
@@ -168,9 +179,102 @@ onMounted(()=>
                     </button>
                   </td>
                 </tr>
-                <tr class="border-b border-gray-600">
-                  <td class="px-4 py-2">test123@mail.ru</td>
-                  <td class="px-4 py-2">Пользователь</td>
+              </tbody>
+            </table>
+
+
+
+
+
+            <div class="bg-gray-800 p-6 rounded-md mb-6">
+          <h2 class="text-lg font-semibold mb-4">Фильтры для пар</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label  class="block text-sm font-medium mb-1">first_crypto</label>
+              <input
+                type="text"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Введите first_crypto"
+              />
+            </div>
+            <div>
+              <label for="type" class="block text-sm font-medium mb-1">type_first_crypto</label>
+              <select
+                id="type1"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Все</option>
+                <option value="crypto1">crypto</option>
+                <option value="fiat1">fiat</option>
+              </select>
+            </div>
+
+
+            <div>
+              <label  class="block text-sm font-medium mb-1">second_crypto</label>
+              <input
+                type="text"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Введите second_crypto"
+              />
+            </div>
+            <div>
+              <label for="type" class="block text-sm font-medium mb-1">type_second_crypto</label>
+              <select
+                id="type2"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Все</option>
+                <option value="crypto2">crypto</option>
+                <option value="fiat2">fiat</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="type" class="block text-sm font-medium mb-1">course</label>
+              <select
+                id="type2"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+
+              >
+                <option value="">Все</option>
+                <option v-for="course in all_pairs" :key="course._id" value="crypto2">{{ course.course }}</option>
+              </select>
+            </div>
+          </div>
+          <button
+            class="mt-4 bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200"
+          >
+            Применить фильтры
+          </button>
+
+          <button
+            class="mt-4 bg-green-600 px-4 py-2 rounded-md ml-2 hover:bg-blue-500 transition duration-200"
+          >
+            Создать пару
+          </button>
+        </div>
+            <h2 class="text-lg font-semibold mb-4">Пары</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+              <thead class="bg-gray-700">
+                <tr>
+                  <th class="px-4 py-2 border-b border-gray-600">first_crypto</th>
+                  <th class="px-4 py-2 border-b border-gray-600">type_first_crypto</th>
+                  <th class="px-4 py-2 border-b border-gray-600">second_crypto</th>
+                  <th class="px-4 py-2 border-b border-gray-600">type_second_crypto</th>
+                  <th class="px-4 py-2 border-b border-gray-600">course</th>
+                  <th class="px-4 py-2 border-b border-gray-600">Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="pair in all_pairs" :key="pair._id" class="border-b border-gray-600">
+                  <td class="px-4 py-2">{{ pair.first_crypto }}</td>
+                  <td class="px-4 py-2">{{ pair.type_first_crypto }}</td>
+                  <td class="px-4 py-2">{{ pair.second_crypto }}</td>
+                  <td class="px-4 py-2">{{ pair.type_second_crypto }}</td>
+                  <td class="px-4 py-2">{{ pair.course }}</td>
+ 
                   <td class="px-4 py-2">
                     <button class="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-400 transition">
                       Редактировать
@@ -183,6 +287,218 @@ onMounted(()=>
               </tbody>
             </table>
           </div>
+          </div>
+
+
+
+
+
+
+          <div class="bg-gray-800 p-4 rounded-md mb-6">
+          <h2 class="text-lg font-semibold mb-4">Фильтры для обменов</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label for="amount" class="block text-sm font-medium mb-1">amount</label>
+              <select
+                id="amount"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option  value="">Все</option>
+                <option v-for="amount in all_exchanges" :key="amount._id" value="admin">{{ amount.amount }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="user_id" class="block text-sm font-medium mb-1">user_id</label>
+              <select
+                id="user_id"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Все</option>
+                <option v-for="user_id in all_exchanges" :key="user_id._id" value="admin">{{ user_id.user_id }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="pair_id" class="block text-sm font-medium mb-1">pair_id</label>
+              <select
+                id="pair_id"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Все</option>
+                <option v-for="pair_id in all_exchanges" :key="pair_id._id" value="admin">{{ pair_id.pair_id }}</option>
+              </select>
+            </div>
+          </div>
+          <button
+            class="mt-4 bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200"
+          >
+            Применить фильтры
+          </button>
+
+          <button
+            class="mt-4 bg-green-600 px-4 py-2 rounded-md ml-2 hover:bg-blue-500 transition duration-200"
+          >
+            Создать обмен
+          </button>
+        </div>
+
+
+
+
+
+
+            <h2 class="text-lg font-semibold mb-4">Обмены</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+              <thead class="bg-gray-700">
+                <tr>
+                  <th class="px-4 py-2 border-b border-gray-600">amount</th>
+                  <th class="px-4 py-2 border-b border-gray-600">user_id</th>
+                  <th class="px-4 py-2 border-b border-gray-600">pair_id</th>
+                  <th class="px-4 py-2 border-b border-gray-600">createdAt</th>
+                  <th class="px-4 py-2 border-b border-gray-600">updatedAt</th>
+                  <th class="px-4 py-2 border-b border-gray-600">Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="exchange in all_exchanges" :key="exchange._id" class="border-b border-gray-600">
+                  <td class="px-4 py-2">{{ exchange.amount }}</td>
+                  <td class="px-4 py-2">{{ exchange.user_id }}</td>
+                  <td class="px-4 py-2">{{ exchange.pair_id }}</td>
+                  <td class="px-4 py-2">{{ new Date(exchange.createdAt).toLocaleDateString() }}</td>
+                  <td class="px-4 py-2">{{ new Date(exchange.updatedAt).toLocaleDateString() }}</td>
+ 
+                  <td class="px-4 py-2">
+                    <button class="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-400 transition">
+                      Редактировать
+                    </button>
+                    <button class="bg-red-600 px-3 py-1 rounded-md hover:bg-red-500 transition ml-2">
+                      Удалить
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+
+
+
+
+
+
+
+
+          <div class="bg-gray-800 p-4 rounded-md mb-6">
+          <h2 class="text-lg font-semibold mb-4">Фильтры для заявок</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label for="amount" class="block text-sm font-medium mb-1">amount</label>
+              <select
+                id="amount"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option  value="">Все</option>
+                <option v-for="amount in all_bids" :key="amount._id" value="admin">{{ amount.amount }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="type" class="block text-sm font-medium mb-1">type</label>
+              <select
+                id="type"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Все</option>
+                <option  value="fiat">fiat</option>
+                <option  value="crypto">crypto</option>
+              </select>
+            </div>
+            <div>
+              <label for="user_id" class="block text-sm font-medium mb-1">user_id</label>
+              <select
+                id="user_id"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Все</option>
+                <option v-for="user_id in all_bids" :key="user_id._id" value="admin">{{ user_id.user_id }}</option>
+              </select>
+            </div>
+            <div>
+              <label for="pair_id" class="block text-sm font-medium mb-1">pair_id</label>
+              <select
+                id="pair_id"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Все</option>
+                <option v-for="pair_id in all_bids" :key="pair_id._id" value="admin">{{ pair_id.pair_id }}</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="to" class="block text-sm font-medium mb-1">to</label>
+              <input
+                type="text"
+                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="to card/wallet"
+              />
+            </div>
+          </div>
+          <button
+            class="mt-4 bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200"
+          >
+            Применить фильтры
+          </button>
+
+          <button
+            class="mt-4 bg-green-600 px-4 py-2 rounded-md ml-2 hover:bg-blue-500 transition duration-200"
+          >
+            Создать заявку
+          </button>
+        </div>
+
+
+
+
+
+
+            <h2 class="text-lg font-semibold mb-4">Заявки</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+              <thead class="bg-gray-700">
+                <tr>
+                  <th class="px-4 py-2 border-b border-gray-600">amount</th>
+                  <th class="px-4 py-2 border-b border-gray-600">type</th>
+                  <th class="px-4 py-2 border-b border-gray-600">to</th>
+                  <th class="px-4 py-2 border-b border-gray-600">user_id</th>
+                  <th class="px-4 py-2 border-b border-gray-600">pair_id</th>
+                  <th class="px-4 py-2 border-b border-gray-600">Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="bid in all_bids" :key="bid._id" class="border-b border-gray-600">
+                  <td class="px-4 py-2">{{ bid.amount }}</td>
+                  <td class="px-4 py-2">{{ bid.type }}</td>
+                  <td class="px-4 py-2">{{ bid.to }}</td>
+                  <td class="px-4 py-2">{{ bid.user_id}}</td>
+                  <td class="px-4 py-2">{{ bid.pair_id }}</td>
+ 
+                  <td class="px-4 py-2">
+                    <button class="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-400 transition">
+                      Редактировать
+                    </button>
+                    <button class="bg-red-600 px-3 py-1 rounded-md hover:bg-red-500 transition ml-2">
+                      Удалить
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+
+
+
+
+
         </div>
       </main>
     </div>
