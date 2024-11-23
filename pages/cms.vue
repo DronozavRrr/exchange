@@ -7,10 +7,58 @@ const all_pairs = ref([]);
 const all_bids = ref([])
 const all_exchanges = ref([])
 const usersState = useUsersStore(); 
-const pairsState = usePairsStore();
+
+const isModalOpen = ref(false);
+const userToEdit = ref(null);
+const userEmail = ref('');
+const userRole = ref('');
+
+
+
+const filterEmail = ref('');
+const filterRole = ref('');
+
+const filteredUsers = computed(() => {
+  return all_users.value.filter(user => {
+    const matchesEmail = filterEmail.value
+      ? user.email.toLowerCase().includes(filterEmail.value.toLowerCase())
+      : true;
+    const matchesRole = filterRole.value ? user.role === filterRole.value : true;
+    return matchesEmail && matchesRole;
+  });
+});
+
+const availableRoles = computed(() => {
+  const rolesSet = new Set(filteredUsers.value.map(user => user.role));
+  return Array.from(rolesSet);
+});
+
+const openEditModal = (user) => {
+  isModalOpen.value = true;
+  userToEdit.value = user;
+  userEmail.value = user.email;
+  userRole.value = user.role;
+};
+
 const BACKEND_URL = "http://localhost:8080/api/";
 const logout_click = () => {
   router.push('/');
+};
+
+
+const openModal = (user = null) => {
+  isModalOpen.value = true;
+  if (user) {
+
+    userToEdit.value = user;
+    userEmail.value = user.email;
+    userRole.value = user.role;
+  } else {
+
+    userToEdit.value = null;
+    userEmail.value = '';
+    userRole.value = 'user';
+  }
 };
 
 const fetchUsers = async () => {
@@ -32,6 +80,78 @@ const fetchUsers = async () => {
     console.error("Ошибка при подключении к серверу:", error);
   }
 };
+
+const deleteUser = async (userId) => {
+  try {
+    const response = await fetch(`${BACKEND_URL}user/${userId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${usersState.token}` }
+    });
+    if (response.ok) {
+      all_users.value = all_users.value.filter(user => user._id !== userId);
+      console.log("Пользователь успешно удален");
+    } else {
+      console.error("Ошибка при удалении пользователя");
+    }
+  } catch (error) {
+    console.error("Ошибка при подключении к серверу:", error);
+  }
+};
+
+
+const saveUser = async () => {
+  try {
+    if (userToEdit.value) {
+      const response = await fetch(`${BACKEND_URL}user`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${usersState.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          _id: userToEdit.value._id,
+          email: userEmail.value,
+          role: userRole.value
+        })
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        const index = all_users.value.findIndex(user => user._id === userToEdit.value._id);
+        all_users.value[index] = updatedUser;
+        isModalOpen.value = false;
+      } else {
+        console.error('Ошибка при редактировании пользователя');
+      }
+    } else {
+      const response = await fetch(`${BACKEND_URL}user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: userEmail.value,
+          password: 'defaultPassword', 
+          role: userRole.value
+        })
+      });
+
+      if (response.ok) {
+        const newUser = await response.json();
+        all_users.value.push(newUser);
+        isModalOpen.value = false;
+      } else {
+        console.error('Ошибка при создании пользователя');
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка при подключении к серверу:', error);
+  }
+};
+
+
+
+
 const fetchPairs = async () => {
   try {
     let response = await fetch(`${BACKEND_URL}pairs`, {
@@ -120,6 +240,7 @@ onMounted(()=>
               <label for="email" class="block text-sm font-medium mb-1">Email</label>
               <input
                 id="email"
+                v-model="filterEmail"
                 type="text"
                 class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Введите email"
@@ -128,22 +249,19 @@ onMounted(()=>
             <div>
               <label for="role" class="block text-sm font-medium mb-1">Роль</label>
               <select
+                v-model="filterRole"
                 id="role"
                 class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Все</option>
-                <option value="admin">Администратор</option>
-                <option value="user">Пользователь</option>
+                <option v-for="role in availableRoles" :key="role" :value="role">{{ role === 'admin' ? 'Администратор' : 'Пользователь' }}</option>
+
               </select>
             </div>
           </div>
-          <button
-            class="mt-4 bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200"
-          >
-            Применить фильтры
-          </button>
 
           <button
+          @click="openModal()"
             class="mt-4 bg-green-600 px-4 py-2 rounded-md ml-2 hover:bg-blue-500 transition duration-200"
           >
             Создать пользователя
@@ -167,21 +285,37 @@ onMounted(()=>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="user in all_users" :key="user._id" class="border-b border-gray-600">
+                <tr v-for="user in filteredUsers" :key="user._id" class="border-b border-gray-600">
                   <td class="px-4 py-2">{{ user.email }}</td>
                   <td class="px-4 py-2">{{ user.role }}</td>
                   <td class="px-4 py-2">
-                    <button class="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-400 transition">
+                    <button @click="openModal(user)" class="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-400 transition">
                       Редактировать
                     </button>
-                    <button class="bg-red-600 px-3 py-1 rounded-md hover:bg-red-500 transition ml-2">
+                    <button @click="deleteUser(user._id)" class="bg-red-600 px-3 py-1 rounded-md hover:bg-red-500 transition ml-2">
                       Удалить
                     </button>
                   </td>
                 </tr>
+                
               </tbody>
+              
             </table>
 
+            <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div class="bg-white text-black p-6 rounded-md w-96">
+        <h2 class="text-lg font-semibold mb-4">{{ userToEdit ? 'Редактировать пользователя' : 'Создать пользователя' }}</h2>
+        <input type="text" v-model="userEmail" placeholder="Email" class="border px-3 py-2 w-full mb-4">
+        <select v-model="userRole" class="border px-3 py-2 w-full mb-4">
+          <option value="admin">Администратор</option>
+          <option value="user">Пользователь</option>
+        </select>
+        <div class="flex justify-end space-x-2">
+          <button @click="isModalOpen = false" class="bg-gray-500 px-4 py-2 rounded-md">Отмена</button>
+          <button @click="saveUser" class="bg-blue-600 px-4 py-2 rounded-md">Сохранить</button>
+        </div>
+      </div>
+    </div>
 
 
 
