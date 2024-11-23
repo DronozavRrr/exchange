@@ -20,17 +20,25 @@ const filterRole = ref('');
 
 const filteredUsers = computed(() => {
   return all_users.value.filter(user => {
+    // Фильтрация по email, если указано значение
     const matchesEmail = filterEmail.value
       ? user.email.toLowerCase().includes(filterEmail.value.toLowerCase())
       : true;
-    const matchesRole = filterRole.value ? user.role === filterRole.value : true;
+
+    // Фильтрация по роли, если выбрано значение
+    const matchesRole = filterRole.value && filterRole.value !== 'Все'
+      ? (filterRole.value === 'Администратор' && user.role === 'admin') || (filterRole.value === 'Пользователь' && user.role === 'user')
+      : true;
+
     return matchesEmail && matchesRole;
   });
 });
 
 const availableRoles = computed(() => {
-  const rolesSet = new Set(filteredUsers.value.map(user => user.role));
-  return Array.from(rolesSet);
+  const rolesSet = new Set(all_users.value
+    .filter(user => user.email.toLowerCase().includes(filterEmail.value.toLowerCase())) // Фильтрация по email
+    .map(user => user.role));
+  return Array.from(rolesSet).map(role => role === 'admin' ? 'Администратор' : 'Пользователь');
 });
 
 const openEditModal = (user) => {
@@ -254,7 +262,7 @@ onMounted(()=>
                 class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Все</option>
-                <option v-for="role in availableRoles" :key="role" :value="role">{{ role === 'admin' ? 'Администратор' : 'Пользователь' }}</option>
+                <option v-for="role in availableRoles" :key="role" :value="role">{{ role }}</option>
 
               </select>
             </div>
