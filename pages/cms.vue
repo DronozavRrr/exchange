@@ -1,6 +1,8 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
+
+import { logAction } from '@/utils/logger';
 const router = useRouter();
 const all_users = ref([])
 const all_pairs = ref([]);
@@ -37,7 +39,6 @@ const filterBidType = ref('');
 const filterBidUserId = ref('');
 const filterBidPairId = ref('');
 const filterBidTo = ref('');
-
 
 
 const filterExchangeAmount = ref('');
@@ -304,12 +305,6 @@ const availableRoles = computed(() => {
   return Array.from(rolesSet).map(role => role === 'admin' ? 'Администратор' : 'Пользователь');
 });
 
-const openEditModal = (user) => {
-  isModalOpen.value = true;
-  userToEdit.value = user;
-  userEmail.value = user.email;
-  userRole.value = user.role;
-};
 
 const BACKEND_URL = "http://localhost:8080/api/";
 const logout_click = () => {
@@ -466,7 +461,6 @@ const openPairModal = (pair = null) => {
 const savePair = async () => {
   try {
     if (pairToEdit.value) {
-      // **Обновление пары (PUT запрос)**
       const response = await fetch(`${BACKEND_URL}pair`, {
         method: 'PUT',
         headers: {
@@ -492,7 +486,6 @@ const savePair = async () => {
         console.error('Ошибка при редактировании пары');
       }
     } else {
-      // **Создание новой пары (POST запрос)**
       const response = await fetch(`${BACKEND_URL}pair`, {
         method: 'POST',
         headers: {
@@ -535,6 +528,266 @@ const deletePair = async (pairId) => {
     }
   } catch (error) {
     console.error('Ошибка при подключении к серверу:', error);
+  }
+};
+
+const bidFilters = ref({
+  amount: '',
+  type: '',    // Новый фильтр для типа заявки
+  to: '',      // Новый фильтр для поля 'to'
+  userId: '',
+  pairId: '',
+  dateFrom: '',
+  dateTo: ''
+});
+
+
+const filteredBids = computed(() => {
+  return all_bids.value.filter(bid => {
+    const { amount, type, to, userId, pairId, dateFrom, dateTo } = bidFilters.value;
+
+    const matchesAmount = amount
+      ? bid.amount.toString().includes(amount)
+      : true;
+
+    const matchesType = type
+      ? bid.type === type
+      : true;
+
+    const matchesTo = to
+      ? bid.to.toLowerCase().includes(to.toLowerCase())
+      : true;
+
+    const matchesUserId = userId
+      ? bid.user_id === userId
+      : true;
+
+    const matchesPairId = pairId
+      ? bid.pair_id === pairId
+      : true;
+
+    const bidDate = new Date(bid.createdAt);
+    const matchesDateFrom = dateFrom
+      ? bidDate >= new Date(dateFrom)
+      : true;
+
+    const matchesDateTo = dateTo
+      ? bidDate <= new Date(dateTo)
+      : true;
+
+    return matchesAmount && matchesType && matchesTo && matchesUserId && matchesPairId && matchesDateFrom && matchesDateTo;
+  });
+});
+
+const availableBidUsers = computed(() => {
+  return Array.from(new Set(
+    all_bids.value
+      .filter(bid => {
+        const { amount, type, to, pairId, dateFrom, dateTo } = bidFilters.value;
+
+        const matchesAmount = amount
+          ? bid.amount.toString().includes(amount)
+          : true;
+        const matchesTypeFilter = type
+          ? bid.type === type
+          : true;
+        const matchesToFilter = to
+          ? bid.to.toLowerCase().includes(to.toLowerCase())
+          : true;
+        const matchesPairIdFilter = pairId
+          ? bid.pair_id === pairId
+          : true;
+        const matchesDateFrom = dateFrom
+          ? new Date(bid.createdAt) >= new Date(dateFrom)
+          : true;
+        const matchesDateTo = dateTo
+          ? new Date(bid.createdAt) <= new Date(dateTo)
+          : true;
+
+        return matchesAmount && matchesTypeFilter && matchesToFilter && matchesPairIdFilter && matchesDateFrom && matchesDateTo;
+      })
+      .map(bid => bid.user_id)
+  ));
+});
+
+
+const availableBidPairs = computed(() => {
+  return Array.from(new Set(
+    all_bids.value
+      .filter(bid => {
+        const { amount, type, to, userId, dateFrom, dateTo } = bidFilters.value;
+
+        const matchesAmount = amount
+          ? bid.amount.toString().includes(amount)
+          : true;
+        const matchesTypeFilter = type
+          ? bid.type === type
+          : true;
+        const matchesToFilter = to
+          ? bid.to.toLowerCase().includes(to.toLowerCase())
+          : true;
+        const matchesUserIdFilter = userId
+          ? bid.user_id === userId
+          : true;
+        const matchesDateFrom = dateFrom
+          ? new Date(bid.createdAt) >= new Date(dateFrom)
+          : true;
+        const matchesDateTo = dateTo
+          ? new Date(bid.createdAt) <= new Date(dateTo)
+          : true;
+
+        return matchesAmount && matchesTypeFilter && matchesToFilter && matchesUserIdFilter && matchesDateFrom && matchesDateTo;
+      })
+      .map(bid => bid.pair_id)
+  ));
+});
+
+watch(bidFilters, () => {
+  if (bidFilters.value.userId && !availableBidUsers.value.includes(bidFilters.value.userId)) {
+    bidFilters.value.userId = '';
+  }
+
+  if (bidFilters.value.pairId && !availableBidPairs.value.includes(bidFilters.value.pairId)) {
+    bidFilters.value.pairId = '';
+  }
+}, { deep: true });
+
+const isBidModalOpen = ref(false);
+const bidToEdit = ref(null);
+const bidAmount = ref('');
+const bidType = ref('');
+const bidTo = ref('');
+const bidUserId = ref('');
+const bidPairId = ref('');
+
+const openBidModal = (bid = null) => {
+  isBidModalOpen.value = true;
+  if (bid) {
+    bidToEdit.value = bid;
+    bidAmount.value = bid.amount;
+    bidType.value = bid.type;
+    bidTo.value = bid.to;
+    bidUserId.value = bid.user_id;
+    bidPairId.value = bid.pair_id;
+  } else {
+    bidToEdit.value = null;
+    bidAmount.value = '';
+    bidType.value = '';
+    bidTo.value = '';
+    bidUserId.value = '';
+    bidPairId.value = '';
+  }
+};
+
+
+const saveBid = async () => {
+  // Валидация данных на клиенте
+  if (!bidAmount.value || bidAmount.value <= 0) {
+    alert('Пожалуйста, введите корректную сумму заявки.');
+    return;
+  }
+  if (bidType.value === '') {
+    alert('Пожалуйста, выберите тип заявки.');
+    return;
+  }
+  if (!bidTo.value) {
+    alert('Пожалуйста, введите номер карты или адрес кошелька.');
+    return;
+  }
+  if (!bidUserId.value) {
+    alert('Пожалуйста, выберите пользователя.');
+    return;
+  }
+  if (!bidPairId.value) {
+    alert('Пожалуйста, выберите пару.');
+    return;
+  }
+
+  try {
+    if (bidToEdit.value) {
+      const response = await fetch(`${BACKEND_URL}bid`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${usersState.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          _id: bidToEdit.value._id,
+          amount: bidAmount.value,
+          type: bidType.value,
+          to: bidTo.value,
+          user_id: bidUserId.value,
+          pair_id: bidPairId.value
+        })
+      });
+
+      if (response.ok) {
+        const updatedBid = await response.json();
+        const index = all_bids.value.findIndex(bid => bid._id === bidToEdit.value._id);
+        all_bids.value[index] = updatedBid;
+        isBidModalOpen.value = false;
+        alert('Заявка успешно обновлена.');
+
+        // Логирование действия на клиенте
+        logAction('update_bid', { bidId: updatedBid._id, amount: updatedBid.amount });
+      } else {
+        console.error('Ошибка при редактировании заявки');
+        alert('Ошибка при редактировании заявки.');
+      }
+    } else {
+      const response = await fetch(`${BACKEND_URL}bid`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${usersState.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          amount: bidAmount.value,
+          type: bidType.value,
+          to: bidTo.value,
+          user_id: bidUserId.value,
+          pair_id: bidPairId.value
+        })
+      });
+
+      if (response.ok) {
+        const newBid = await response.json();
+        all_bids.value.push(newBid);
+        isBidModalOpen.value = false;
+        alert('Заявка успешно создана.');
+
+        // Логирование действия на клиенте
+        logAction('create_bid', { bidId: newBid._id, amount: newBid.amount });
+      } else {
+        console.error('Ошибка при создании заявки');
+        alert('Ошибка при создании заявки.');
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка при сохранении заявки:', error);
+    alert('Произошла ошибка при сохранении заявки.');
+  }
+};
+
+const deleteBid = async (bidId) => {
+  if (!confirm('Вы уверены, что хотите удалить эту заявку?')) return;
+
+  try {
+    const response = await fetch(`${BACKEND_URL}bid/id/${bidId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${usersState.token}` },
+    });
+    if (response.ok) {
+      all_bids.value = all_bids.value.filter(bid => bid._id !== bidId);
+      console.log('Заявка успешно удалена');
+      alert('Заявка успешно удалена.');
+    } else {
+      console.error('Ошибка при удалении заявки');
+      alert('Ошибка при удалении заявки.');
+    }
+  } catch (error) {
+    console.error('Ошибка при подключении к серверу:', error);
+    alert('Произошла ошибка при удалении заявки.');
   }
 };
 
@@ -1045,111 +1298,231 @@ onMounted(()=>
 
 
 
-          <div class="bg-gray-800 p-4 rounded-md mb-6">
-          <h2 class="text-lg font-semibold mb-4">Фильтры для заявок</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label for="amount" class="block text-sm font-medium mb-1">amount</label>
-              <select
-                id="amount"
-                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option  value="">Все</option>
-                <option v-for="amount in all_bids" :key="amount._id" value="admin">{{ amount.amount }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="type" class="block text-sm font-medium mb-1">type</label>
-              <select
-                id="type"
-                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Все</option>
-                <option  value="fiat">fiat</option>
-                <option  value="crypto">crypto</option>
-              </select>
-            </div>
-            <div>
-              <label for="user_id" class="block text-sm font-medium mb-1">user_id</label>
-              <select
-                id="user_id"
-                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Все</option>
-                <option v-for="user_id in all_bids" :key="user_id._id" value="admin">{{ user_id.user_id }}</option>
-              </select>
-            </div>
-            <div>
-              <label for="pair_id" class="block text-sm font-medium mb-1">pair_id</label>
-              <select
-                id="pair_id"
-                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Все</option>
-                <option v-for="pair_id in all_bids" :key="pair_id._id" value="admin">{{ pair_id.pair_id }}</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="to" class="block text-sm font-medium mb-1">to</label>
-              <input
-                type="text"
-                class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="to card/wallet"
-              />
-            </div>
+      <div class="bg-gray-800 p-4 rounded-md mb-6">
+        <h2 class="text-lg font-semibold mb-4">Фильтры для заявок</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label for="bid-amount" class="block text-sm font-medium mb-1">Сумма</label>
+            <input
+              id="bid-amount"
+              v-model="bidFilters.amount"
+              type="number"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Введите сумму"
+            />
           </div>
-          <button
-            class="mt-4 bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200"
-          >
-            Применить фильтры
-          </button>
-
-          <button
-            class="mt-4 bg-green-600 px-4 py-2 rounded-md ml-2 hover:bg-blue-500 transition duration-200"
-          >
-            Создать заявку
-          </button>
+          <div>
+            <label for="bid-type" class="block text-sm font-medium mb-1">Тип</label>
+            <select
+              id="bid-type"
+              v-model="bidFilters.type"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Все</option>
+              <option value="fiat">Fiat</option>
+              <option value="crypto">Crypto</option>
+            </select>
+          </div>
+          <div>
+            <label for="bid-to" class="block text-sm font-medium mb-1">Номер карты / Адрес кошелька</label>
+            <input
+              id="bid-to"
+              v-model="bidFilters.to"
+              type="text"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Введите номер карты или адрес кошелька"
+            />
+          </div>
+          <div>
+            <label for="bid-user_id" class="block text-sm font-medium mb-1">Пользователь</label>
+            <select
+              id="bid-user_id"
+              v-model="bidFilters.userId"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Все</option>
+              <option v-for="userId in availableBidUsers" :key="userId" :value="userId">
+                {{ userId }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label for="bid-pair_id" class="block text-sm font-medium mb-1">Пара</label>
+            <select
+              id="bid-pair_id"
+              v-model="bidFilters.pairId"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Все</option>
+              <option v-for="pairId in availableBidPairs" :key="pairId" :value="pairId">
+                {{ pairId }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label for="bid-date-from" class="block text-sm font-medium mb-1">Дата с</label>
+            <input
+              id="bid-date-from"
+              v-model="bidFilters.dateFrom"
+              type="date"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label for="bid-date-to" class="block text-sm font-medium mb-1">Дата по</label>
+            <input
+              id="bid-date-to"
+              v-model="bidFilters.dateTo"
+              type="date"
+              class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
         </div>
 
+        <button
+          class="mt-4 bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-500 transition duration-200"
+        >
+          Применить фильтры
+        </button>
+
+        <button
+          class="mt-4 bg-green-600 px-4 py-2 rounded-md ml-2 hover:bg-green-500 transition duration-200"
+          @click="openBidModal()"
+        >
+          Создать заявку
+        </button>
+      </div>
 
 
 
 
 
-            <h2 class="text-lg font-semibold mb-4">Заявки</h2>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-left text-sm">
-              <thead class="bg-gray-700">
-                <tr>
-                  <th class="px-4 py-2 border-b border-gray-600">amount</th>
-                  <th class="px-4 py-2 border-b border-gray-600">type</th>
-                  <th class="px-4 py-2 border-b border-gray-600">to</th>
-                  <th class="px-4 py-2 border-b border-gray-600">user_id</th>
-                  <th class="px-4 py-2 border-b border-gray-600">pair_id</th>
-                  <th class="px-4 py-2 border-b border-gray-600">Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="bid in all_bids" :key="bid._id" class="border-b border-gray-600">
-                  <td class="px-4 py-2">{{ bid.amount }}</td>
-                  <td class="px-4 py-2">{{ bid.type }}</td>
-                  <td class="px-4 py-2">{{ bid.to }}</td>
-                  <td class="px-4 py-2">{{ bid.user_id}}</td>
-                  <td class="px-4 py-2">{{ bid.pair_id }}</td>
- 
-                  <td class="px-4 py-2">
-                    <button class="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-400 transition">
-                      Редактировать
-                    </button>
-                    <button class="bg-red-600 px-3 py-1 rounded-md hover:bg-red-500 transition ml-2">
-                      Удалить
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+      <h2 class="text-lg font-semibold mb-4">Заявки</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-gray-700">
+              <tr>
+                <th class="px-4 py-2 border-b border-gray-600">Сумма</th>
+                <th class="px-4 py-2 border-b border-gray-600">Тип</th>
+                <th class="px-4 py-2 border-b border-gray-600">Номер карты / Адрес кошелька</th>
+                <th class="px-4 py-2 border-b border-gray-600">Пользователь</th>
+                <th class="px-4 py-2 border-b border-gray-600">Пара</th>
+                <th class="px-4 py-2 border-b border-gray-600">Создано</th>
+                <th class="px-4 py-2 border-b border-gray-600">Обновлено</th>
+                <th class="px-4 py-2 border-b border-gray-600">Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="bid in filteredBids"
+                :key="bid._id"
+                class="border-b border-gray-600"
+              >
+                <td class="px-4 py-2">{{ bid.amount }}</td>
+                <td class="px-4 py-2">
+                  {{ bid.type  }}
+                </td>
+                <td class="px-4 py-2">
+                  {{ bid.to }}
+                </td>
+                <td class="px-4 py-2">
+                  {{ bid.user_id }}
+                </td>
+                <td class="px-4 py-2">
+                  {{ bid.pair_id }}
+                </td>
+                <td class="px-4 py-2">{{ new Date(bid.createdAt).toLocaleDateString() }}</td>
+                <td class="px-4 py-2">{{ new Date(bid.updatedAt).toLocaleDateString() }}</td>
+                <td class="px-4 py-2">
+                  <button
+                    @click="openBidModal(bid)"
+                    class="bg-yellow-500 px-3 py-1 rounded-md hover:bg-yellow-400 transition"
+                  >
+                    Редактировать
+                  </button>
+                  <button
+                    @click="deleteBid(bid._id)"
+                    class="bg-red-600 px-3 py-1 rounded-md hover:bg-red-500 transition ml-2"
+                  >
+                    Удалить
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div
+        v-if="isBidModalOpen"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+      >
+        <div class="bg-white text-black p-6 rounded-md w-96">
+          <h2 class="text-lg font-semibold mb-4">
+            {{ bidToEdit ? 'Редактировать заявку' : 'Создать заявку' }}
+          </h2>
+          <input
+            type="number"
+            v-model="bidAmount"
+            placeholder="Сумма"
+            class="border px-3 py-2 w-full mb-4"
+          />
+          <label class="block text-sm font-medium mb-1">Тип</label>
+          <select
+            v-model="bidType"
+            class="border px-3 py-2 w-full mb-4"
+          >
+            <option value="">Выберите тип</option>
+            <option value="fiat">Fiat</option>
+            <option value="crypto">Crypto</option>
+          </select>
+
+          <label class="block text-sm font-medium mb-1">Номер карты / Адрес кошелька</label>
+          <input
+            type="text"
+            v-model="bidTo"
+            placeholder="Введите номер карты или адрес кошелька"
+            class="border px-3 py-2 w-full mb-4"
+          />
+
+          <label class="block text-sm font-medium mb-1">Пользователь</label>
+          <select
+            v-model="bidUserId"
+            class="border px-3 py-2 w-full mb-4"
+          >
+            <option value="">Выберите пользователя</option>
+            <option v-for="userId in availableBidUsers" :key="userId" :value="userId">
+              {{ userId }}
+            </option>
+          </select>
+
+          <label class="block text-sm font-medium mb-1">Пара</label>
+          <select
+            v-model="bidPairId"
+            class="border px-3 py-2 w-full mb-4"
+          >
+            <option value="">Выберите пару</option>
+            <option v-for="pairId in availableBidPairs" :key="pairId" :value="pairId">
+              {{ pairId }}
+            </option>
+          </select>
+
+          <div class="flex justify-end space-x-2">
+            <button
+              @click="isBidModalOpen = false"
+              class="bg-gray-500 px-4 py-2 rounded-md"
+            >
+              Отмена
+            </button>
+            <button
+              @click="saveBid"
+              class="bg-blue-600 px-4 py-2 rounded-md"
+            >
+              Сохранить
+            </button>
           </div>
+        </div>
+        </div>
 
 
 
@@ -1158,5 +1531,7 @@ onMounted(()=>
 
         </div>
       </main>
+      <logs />
     </div>
+
   </template>
