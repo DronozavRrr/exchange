@@ -14,6 +14,8 @@ const amountToSend = ref(0);
 const convertedAmount = ref(0); 
 
 
+
+
 const fetchPairs = async () => {
   try {
     let response = await fetch(`${BACKEND_URL}pairs`, {
@@ -54,6 +56,10 @@ const getTradeTokens = async (first_crypto) => {
 
       if (trade_tokens.value.length > 0) {
         pairsState.second_crypto = trade_tokens.value[0].second_crypto;
+        pairsState.pair_id = trade_tokens.value[0]._id;
+        pairsState.amount_first_crypto = amountToSend.value
+        pairsState.type_first_crypto = trade_tokens.value[0].type_first_crypto
+        pairsState.type_second_crypto = trade_tokens.value[0].type_second_crypto
         selectedSecondCrypto.value = trade_tokens.value[0].second_crypto;
         pairsState.course = trade_tokens.value[0].course; // Установка course
         console.log(`Initial course: ${pairsState.course}`);
@@ -68,31 +74,6 @@ const getTradeTokens = async (first_crypto) => {
     }
   } catch (error) {
     console.error("Ошибка при подключении к серверу:", error);
-  }
-};
-
-
-const handleFirstCryptoChange = (event) => {
-  
-  const selectedId = event.target.value;
-  selectedPairId.value = selectedId; 
-  
-
-  pairsState.first_crypto = selectedId;
-  getTradeTokens(selectedId);
-};
-const handleSecondCryptoChange = (event) => {
-  pairsState.second_crypto = selectedSecondCrypto.value;
-  console.log(`Selected second crypto: ${pairsState.second_crypto}`);
-
-
-  const selectedToken = trade_tokens.value.find(token => token.second_crypto === selectedSecondCrypto.value);
-  console.log("tutau - ")
-  console.log(selectedToken.course)
-  if (selectedToken) {
-    pairsState.course = selectedToken.course;
-    pairsState.type_second_crypto= selectedToken.type_second_crypto;
-    console.log(`Selected course: ${pairsState.course}`);
   }
 };
 watch(amountToSend, (newAmount) => 
@@ -110,17 +91,70 @@ watch(amountToSend, (newAmount) =>
   }
 });
 
+const handleFirstCryptoChange = async (event) => {
+  const selectedFirstCrypto = event.target.value;
+  pairsState.first_crypto = selectedFirstCrypto; // Устанавливаем первую криптовалюту
+
+  // Получаем возможные пары для выбранной первой криптовалюты
+  await getTradeTokens(selectedFirstCrypto);
+
+  if (trade_tokens.value.length > 0) {
+    // Устанавливаем вторую криптовалюту и pair_id по умолчанию
+    const defaultPair = trade_tokens.value[0];
+    pairsState.second_crypto = defaultPair.second_crypto;
+    pairsState.pair_id = defaultPair._id;
+    pairsState.type_first_crypto = defaultPair.type_first_crypto;
+    pairsState.course = defaultPair.course;
+
+    pairsState.type_second_crypto = defaultPair.type_second_crypto;
+    selectedSecondCrypto.value = defaultPair.second_crypto;
+
+    console.log(`Selected pair ID: ${pairsState.pair_id}`);
+  } else {
+    // Если для первой криптовалюты нет пар
+    pairsState.second_crypto = null;
+    pairsState.pair_id = null;
+    pairsState.course = null;
+    selectedSecondCrypto.value = null;
+  }
+};
+
+const handleSecondCryptoChange = (event) => {
+  const selectedSecondCryptoValue = event.target.value;
+  pairsState.second_crypto = selectedSecondCryptoValue;
+
+  // Найти выбранную пару по second_crypto
+  const selectedPair = trade_tokens.value.find(
+    (token) => token.second_crypto === selectedSecondCryptoValue
+  );
+
+  if (selectedPair) {
+    pairsState.pair_id = selectedPair._id;
+    pairsState.course = selectedPair.course;
+    pairsState.type_second_crypto = selectedPair.type_second_crypto;
+
+    console.log(`Updated pair ID: ${pairsState.pair_id}`);
+  } else {
+    // Если выбранная пара не найдена
+    pairsState.pair_id = null;
+    pairsState.course = null;
+  }
+};
+
 onMounted(async () => {
+  // Загружаем пары при инициализации
   await fetchPairs();
 
   if (all_pairs.value.length > 0) {
     const defaultFirstCrypto = all_pairs.value[0].first_crypto;
-    selectedPairId.value = defaultFirstCrypto;
     pairsState.first_crypto = defaultFirstCrypto;
-    
+    selectedPairId.value = defaultFirstCrypto;
+
+    // Устанавливаем данные для первой пары
     await getTradeTokens(defaultFirstCrypto);
   }
 });
+
 </script>
 
 <template>
@@ -164,4 +198,5 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
 
