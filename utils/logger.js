@@ -12,7 +12,7 @@ export const logAction = async (action, details = {}) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}` // Исправлено: используйте обратные кавычки
       },
       body: JSON.stringify({
         action,
