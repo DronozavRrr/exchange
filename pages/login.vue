@@ -36,6 +36,7 @@ const submitForm = async () => {
     console.log(responseData)
     if(isLogin.value)
     {
+      alert('Вы успешно авторизовались')
         usersStore.auth(responseData.token);
       if (response.ok) {
         router.push('/');
@@ -45,6 +46,8 @@ const submitForm = async () => {
       }
     }
     else{
+      alert('Вы успешно зарегистрировались')
+
       isLogin.value = true;
 
     }

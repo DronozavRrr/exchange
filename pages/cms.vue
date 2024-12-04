@@ -123,7 +123,7 @@ const filteredExchanges = computed(() => {
   });
 });
 
-// Вычисляемые свойства для доступных опций фильтров (умные фильтры)
+
 const availableExchangeUsers = computed(() => {
   return Array.from(new Set(
     all_exchanges.value
@@ -190,7 +190,6 @@ const getPairName = (pairId) => {
   return pair ? `${pair.first_crypto} / ${pair.second_crypto}` : 'Неизвестно';
 };
 
-// **Обработчики для умных фильтров**
 
 watch([filterExchangeAmount, filterExchangeUserId, filterExchangePairId, filterExchangeDateFrom, filterExchangeDateTo], () => {
   // Проверка и сброс зависимых фильтров, если текущий выбор больше не доступен
@@ -229,7 +228,7 @@ const openExchangeModal = (exchange = null) => {
 const saveExchange = async () => {
   try {
     if (exchangeToEdit.value) {
-      // **Обновление обмена (PUT запрос)**
+
       const response = await fetch(`${BACKEND_URL}exchange`, {
         method: 'PUT',
         headers: {
@@ -253,7 +252,7 @@ const saveExchange = async () => {
         console.error('Ошибка при редактировании обмена');
       }
     } else {
-      // **Создание нового обмена (POST запрос)**
+
       const response = await fetch(`${BACKEND_URL}exchange`, {
         method: 'POST',
         headers: {
